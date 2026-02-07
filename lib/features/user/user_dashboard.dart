@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
 
-class CourierDashboard extends StatefulWidget {
-  const CourierDashboard({super.key});
+class UserDashboard extends StatefulWidget {
+  const UserDashboard({super.key});
 
   @override
-  State<CourierDashboard> createState() => _CourierDashboardState();
+  State<UserDashboard> createState() => _UserDashboardState();
 }
 
-class _CourierDashboardState extends State<CourierDashboard> {
+class _UserDashboardState extends State<UserDashboard> {
   Future<void> _logout() async {
     await AuthService.logout();
     if (!mounted) return;
@@ -19,7 +19,7 @@ class _CourierDashboardState extends State<CourierDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Courier Dashboard')),
+      appBar: AppBar(title: const Text('User Dashboard')),
       body: Center(
         child: ElevatedButton(
           onPressed: _logout,
