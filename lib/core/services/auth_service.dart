@@ -37,23 +37,42 @@ class AuthService {
 
 
   static Future<String> login({
-    required String email,
-    required String password,
-  }) async {
-    final response = await DioClient.client.post(
-      '/auth/login',
-      data: {
-        'email': email,
-        'password': password,
-      },
-    );
+  required String email,
+  required String password,
+}) async {
+  final response = await DioClient.client.post(
+    '/auth/login',
+    data: {
+      'email': email,
+      'password': password,
+    },
+  );
 
-    final token = response.data['token'];
-    final role = response.data['user']['role'];
+  print('LOGIN RESPONSE: ${response.data}');
 
-    await TokenStorage.saveToken(token);
-    return role;
+  final data = response.data;
+
+  final token = data['token'] ?? data['access_token'];
+  if (token == null) {
+    throw Exception('TOKEN NULL');
   }
+
+  await TokenStorage.saveToken(token);
+
+  String? role;
+  if (data['user'] != null) {
+    role = data['user']['role'];
+  } else if (data['role'] != null) {
+    role = data['role'];
+  }
+
+  if (role == null) {
+    throw Exception('ROLE NULL');
+  }
+
+  return role;
+}
+
 
   static Future<void> logout() async {
     await DioClient.client.post('/auth/logout');

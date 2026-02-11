@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (!mounted) return;
       switch (role) {
-        case 'seller':
+        case 'admin':
           Navigator.pushReplacementNamed(context, '/admin');
           break;
         case 'user':
