@@ -2,86 +2,66 @@ import '../network/dio_client.dart';
 import '../storage/token_storage.dart';
 
 class AuthService {
+  /// REGISTER + AUTO LOGIN
   static Future<String> register({
-  required String username,
-  required String email,
-  required String password,
-  required String role,
-}) async {
-  await DioClient.client.post(
-    '/auth/register',
-    data: {
-      'username': username,
-      'email': email,
-      'password': password,
-      'role': role,
-    },
-  );
+    required String username,
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    await DioClient.client.post(
+      '/auth/register',
+      data: {
+        'username': username,
+        'email': email,
+        'password': password,
+        'role': role,
+      },
+    );
 
-  // AUTO LOGIN
-  final loginResponse = await DioClient.client.post(
-    '/auth/login',
-    data: {
-      'email': email,
-      'password': password,
-    },
-  );
+    return await login(email: email, password: password);
+  }
 
-  final token = loginResponse.data['token'];
-  final userRole = loginResponse.data['user']['role'];
-
-  await TokenStorage.saveToken(token);
-
-  return userRole;
-}
-
-
+  /// LOGIN
   static Future<String> login({
-  required String email,
-  required String password,
-}) async {
-  final response = await DioClient.client.post(
-    '/auth/login',
-    data: {
-      'email': email,
-      'password': password,
-    },
-  );
+    required String email,
+    required String password,
+  }) async {
+    final response = await DioClient.client.post(
+      '/auth/login',
+      data: {'email': email, 'password': password},
+    );
 
-  print('LOGIN RESPONSE: ${response.data}');
+    final data = response.data;
 
-  final data = response.data;
+    final token = data['token'];
+    final role = data['user']['role'];
 
-  final token = data['token'] ?? data['access_token'];
-  if (token == null) {
-    throw Exception('TOKEN NULL');
+    if (token == null) {
+      throw Exception('Token tidak ditemukan');
+    }
+
+    await TokenStorage.saveToken(token);
+    await TokenStorage.saveRole(role);
+    return role;
   }
 
-  await TokenStorage.saveToken(token);
-
-  String? role;
-  if (data['user'] != null) {
-    role = data['user']['role'];
-  } else if (data['role'] != null) {
-    role = data['role'];
-  }
-
-  if (role == null) {
-    throw Exception('ROLE NULL');
-  }
-
-  return role;
-}
-
-
+  /// LOGOUT
   static Future<void> logout() async {
     await DioClient.client.post('/auth/logout');
-    await TokenStorage.clearToken();
+    await TokenStorage.clearAll();
   }
 
-  // ✅ INI YANG KURANG
+  /// GET ROLE (dipakai splash)
   static Future<String> getRole() async {
     final response = await DioClient.client.get('/profile');
-    return response.data['data']['role'];
+
+    final body = response.data;
+
+    if (body["success"] != true) {
+      throw Exception("Get role gagal");
+    }
+
+    return body["data"]["role"];
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/storage/token_storage.dart';
-import '../../core/services/auth_service.dart';
+// import '../../core/services/auth_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -17,42 +17,35 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> checkAuth() async {
-    final token = await TokenStorage.getToken();
+  final token = await TokenStorage.getToken();
+  final role = await TokenStorage.getRole();
 
-    if (!mounted) return;
+  if (!mounted) return;
 
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, '/login');
-      return;
-    }
-
-    try {
-      final role = await AuthService.getRole();
-
-      if (!mounted) return;
-
-      switch (role) {
-        case 'seller':
-          Navigator.pushReplacementNamed(context, '/admin');
-          break;
-        case 'user':
-          Navigator.pushReplacementNamed(context, '/user');
-          break;
-        case 'jastiper':
-          Navigator.pushReplacementNamed(context, '/kurir');
-          break;
-        default:
-          Navigator.pushReplacementNamed(context, '/login');
-      }
-    } catch (_) {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+  if (token == null || role == null) {
+    Navigator.pushReplacementNamed(context, '/home');
+    return;
   }
+
+  switch (role) {
+    case 'seller':
+      Navigator.pushReplacementNamed(context, '/admin');
+      break;
+    case 'user':
+      Navigator.pushReplacementNamed(context, '/user');
+      break;
+    case 'jastiper':
+      Navigator.pushReplacementNamed(context, '/courier');
+      break;
+    default:
+      Navigator.pushReplacementNamed(context, '/login');
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
