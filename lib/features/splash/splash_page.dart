@@ -17,32 +17,34 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> checkAuth() async {
-  final token = await TokenStorage.getToken();
-  final role = await TokenStorage.getRole();
+    // Tambah delay biar ga terlalu kenceng (keren dikit)
+    await Future.delayed(const Duration(seconds: 2));
 
-  if (!mounted) return;
+    final token = await TokenStorage.getToken();
+    final role = await TokenStorage.getRole();
 
-  if (token == null || role == null) {
-    Navigator.pushReplacementNamed(context, '/home');
-    return;
+    if (!mounted) return;
+
+    if (token == null || role == null) {
+      Navigator.pushReplacementNamed(context, '/home');
+      return;
+    }
+
+    switch (role) {
+      case 'seller':
+      case 'admin': // Tambah admin karena di login case-nya admin
+        Navigator.pushReplacementNamed(context, '/admin');
+        break;
+      case 'user':
+        Navigator.pushReplacementNamed(context, '/user');
+        break;
+      case 'jastiper':
+        Navigator.pushReplacementNamed(context, '/courier');
+        break;
+      default:
+        Navigator.pushReplacementNamed(context, '/login');
+    }
   }
-
-  switch (role) {
-    case 'seller':
-      Navigator.pushReplacementNamed(context, '/admin');
-      break;
-    case 'user':
-      Navigator.pushReplacementNamed(context, '/user');
-      break;
-    case 'jastiper':
-      Navigator.pushReplacementNamed(context, '/courier');
-      break;
-    default:
-      Navigator.pushReplacementNamed(context, '/login');
-  }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
