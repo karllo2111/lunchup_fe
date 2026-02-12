@@ -4,7 +4,7 @@ import '../../models/product_model.dart';
 class ProductService {
   /// GET ALL PRODUCTS (with auth token via DioClient interceptor)
   static Future<List<Product>> getProducts() async {
-    final res = await DioClient.client.get('/admin/products');
+    final res = await DioClient.client.get('/products');
 
     final data = res.data;
 
@@ -47,10 +47,7 @@ class ProductService {
 
   /// UPDATE PRODUCT
   static Future<void> updateProduct(int id, Map<String, dynamic> body) async {
-    final res = await DioClient.client.put(
-      '/admin/products/$id',
-      data: body,
-    );
+    final res = await DioClient.client.put('/admin/products/$id', data: body);
 
     if (res.statusCode != 200) {
       throw Exception('Gagal mengupdate produk');

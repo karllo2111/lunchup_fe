@@ -42,81 +42,134 @@ class _MenuPageState extends State<MenuPage> {
     final stock = TextEditingController(text: product?.stock.toString());
     final category = TextEditingController(text: product?.category);
 
+    String? nameErr, priceErr, stockErr, catErr;
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(product == null ? "Tambah Menu" : "Edit Menu"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: name,
-                decoration: const InputDecoration(labelText: "Nama"),
-              ),
-              TextField(
-                controller: desc,
-                decoration: const InputDecoration(labelText: "Deskripsi"),
-              ),
-              TextField(
-                controller: price,
-                decoration: const InputDecoration(labelText: "Harga"),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: stock,
-                decoration: const InputDecoration(labelText: "Stock"),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: category,
-                decoration: const InputDecoration(labelText: "Kategori"),
-              ),
-            ],
+      builder: (_) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(product == null ? "Tambah Menu" : "Edit Menu"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: name,
+                  decoration: InputDecoration(
+                    labelText: "Nama",
+                    errorText: nameErr,
+                  ),
+                  onChanged: (v) => setDialogState(() => nameErr = null),
+                ),
+                TextField(
+                  controller: desc,
+                  decoration: const InputDecoration(labelText: "Deskripsi"),
+                ),
+                TextField(
+                  controller: price,
+                  decoration: InputDecoration(
+                    labelText: "Harga",
+                    errorText: priceErr,
+                    hintText: "Contoh: 15000",
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setDialogState(() => priceErr = null),
+                ),
+                TextField(
+                  controller: stock,
+                  decoration: InputDecoration(
+                    labelText: "Stock",
+                    errorText: stockErr,
+                    hintText: "Contoh: 10",
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (v) => setDialogState(() => stockErr = null),
+                ),
+                TextField(
+                  controller: category,
+                  decoration: InputDecoration(
+                    labelText: "Kategori",
+                    errorText: catErr,
+                  ),
+                  onChanged: (v) => setDialogState(() => catErr = null),
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                if (product == null) {
-                  await ProductService.addProduct(
-                    name: name.text,
-                    description: desc.text,
-                    price: price.text,
-                    stock: stock.text,
-                    category: category.text,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Custom Validation Logic
+                bool isValid = true;
+                setDialogState(() {
+                  if (name.text.trim().isEmpty) {
+                    nameErr = "Nama tidak boleh kosong";
+                    isValid = false;
+                  }
+                  if (category.text.trim().isEmpty) {
+                    catErr = "Kategori tidak boleh kosong";
+                    isValid = false;
+                  }
+
+                  // Numeric check for price
+                  if (price.text.trim().isEmpty) {
+                    priceErr = "Harga tidak boleh kosong";
+                    isValid = false;
+                  } else if (double.tryParse(price.text) == null) {
+                    priceErr = "Harga harus berupa angka (contoh: 15000)";
+                    isValid = false;
+                  }
+
+                  // Numeric check for stock
+                  if (stock.text.trim().isEmpty) {
+                    stockErr = "Stock tidak boleh kosong";
+                    isValid = false;
+                  } else if (int.tryParse(stock.text) == null) {
+                    stockErr = "Stock harus berupa angka bulat (contoh: 10)";
+                    isValid = false;
+                  }
+                });
+
+                if (!isValid) return;
+
+                try {
+                  if (product == null) {
+                    await ProductService.addProduct(
+                      name: name.text,
+                      description: desc.text,
+                      price: price.text,
+                      stock: stock.text,
+                      category: category.text,
+                    );
+                  } else {
+                    await ProductService.updateProduct(product.id, {
+                      "name": name.text,
+                      "description": desc.text,
+                      "price": price.text,
+                      "stock": stock.text,
+                      "category": category.text,
+                    });
+                  }
+                  if (!mounted) return;
+                  Navigator.pop(context);
+                  _showSnackBar(
+                    product == null
+                        ? "Produk berhasil ditambahkan"
+                        : "Produk berhasil diupdate",
                   );
-                } else {
-                  await ProductService.updateProduct(product.id, {
-                    "name": name.text,
-                    "description": desc.text,
-                    "price": price.text,
-                    "stock": stock.text,
-                    "category": category.text,
-                  });
+                  refresh();
+                } catch (e) {
+                  _showSnackBar("Gagal menyimpan: $e", isError: true);
                 }
-                if (!mounted) return;
-                Navigator.pop(context);
-                _showSnackBar(
-                  product == null
-                      ? "Produk berhasil ditambahkan"
-                      : "Produk berhasil diupdate",
-                );
-                refresh();
-              } catch (e) {
-                if (!mounted) return;
-                Navigator.pop(context);
-                _showSnackBar("Error: $e", isError: true);
-              }
-            },
-            child: const Text("Simpan"),
-          ),
-        ],
+              },
+              child: const Text("Simpan"),
+            ),
+          ],
+        ),
       ),
     );
   }
