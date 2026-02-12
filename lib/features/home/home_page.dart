@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -9,54 +10,49 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Wave atas - PAKAI FOTO
+          // Wave atas
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: Image.asset(
-              'assets/images/wave_top.png',
-              fit: BoxFit.cover,
-              height: 120,
+            child: Transform.rotate(
+              angle: 3.14159,
+              child: SvgPicture.asset(
+                'assets/images/wave_top.svg',
+                fit: BoxFit.fill,
+                height: 100,
+              ),
             ),
           ),
-
-          // Wave bawah - PAKAI FOTO
+          // Wave bawah - TETAP
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: Image.asset(
-              'assets/images/wave_bottom.png',
-              fit: BoxFit.cover,
-              height: 120,
+            child: SvgPicture.asset(
+              'assets/images/wave_bottom.svg',
+              fit: BoxFit.fill,
+              height: 100,
             ),
           ),
-
           // Konten utama
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo
-                Image.asset('assets/images/logo.png', width: 80, height: 80),
-                const SizedBox(height: 20),
-
-                // Text LunchUp
-                const Text(
-                  'LunchUp',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo
+                  Image.asset(
+                    'assets/images/logo.png', 
+                    // width: 50,
+                    height: 350,
                   ),
-                ),
-                const SizedBox(height: 100),
-
-                // Button Sign up
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: SizedBox(
+                  const SizedBox(height: 20),
+                  
+                  const SizedBox(height: 100),
+                  // Button Sign up
+                  SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
@@ -79,33 +75,35 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-
-                // Text Sign in
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Already have account? ',
-                      style: TextStyle(color: Colors.black54, fontSize: 14),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
-                      child: const Text(
-                        'Sign in',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(height: 15),
+                  // Text Sign in
+                  Flexible(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Already have account? ',
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
                         ),
-                      ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/login');
+                          },
+                          child: const Text(
+                            'Sign in',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
